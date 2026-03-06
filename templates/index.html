@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoring Réseau</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+
+<body class="bg-gray-950 text-gray-100 min-h-screen p-10">
+
+    <div class="max-w-5xl mx-auto">
+
+        <div class="mb-10">
+            <h1 class="text-3xl font-bold text-blue-400 mb-2">
+                🌐 Monitoring Réseau — 2 LAN & 1 Routeur
+            </h1>
+            <p class="text-gray-500 text-sm">
+                Surveillance en temps réel des équipements réseau — rafraîchissement automatique toutes les 30 secondes
+            </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6 mb-10">
+            <div class="bg-gray-900 rounded-2xl p-6 text-center">
+                <div class="text-4xl font-bold text-green-400 mb-1">
+                    {{ resultats | selectattr("statut") | list | length }}
+                </div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">En ligne</div>
+            </div>
+            <div class="bg-gray-900 rounded-2xl p-6 text-center">
+                <div class="text-4xl font-bold text-red-400 mb-1">
+                    {{ resultats | rejectattr("statut") | list | length }}
+                </div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">Hors ligne</div>
+            </div>
+            <div class="bg-gray-900 rounded-2xl p-6 text-center">
+                <div class="text-4xl font-bold text-blue-400 mb-1">
+                    {{ resultats | length }}
+                </div>
+                <div class="text-xs text-gray-500 uppercase tracking-widest">Total</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for eq in resultats %}
+            <div id="{{ eq.ip }}" class="bg-gray-900 rounded-2xl p-6 border-l-4
+                {{ 'border-green-400' if eq.statut else 'border-red-400' }}">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-semibold text-gray-100">{{ eq.nom }}</span>
+                    <span class="badge text-xs font-bold px-3 py-1 rounded-full
+                        {{ 'bg-green-400/10 text-green-400' if eq.statut else 'bg-red-400/10 text-red-400' }}">
+                        {{ 'EN LIGNE' if eq.statut else 'HORS LIGNE' }}
+                    </span>
+                </div>
+                <div class="text-sm font-mono text-gray-500">{{ eq.ip }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <script>
+        function rafraichir() {
+            fetch("/api/statuts")
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(eq => {
+                        const carte = document.getElementById(eq.ip);
+                        if (!carte) return;
+
+                        const badge = carte.querySelector(".badge");
+                        const enligne = eq.statut;
+
+                        carte.className = carte.className
+                            .replace("border-green-400", "")
+                            .replace("border-red-400", "")
+                            + (enligne ? " border-green-400" : " border-red-400");
+
+                        badge.className = badge.className
+                            .replace("bg-green-400/10 text-green-400", "")
+                            .replace("bg-red-400/10 text-red-400", "")
+                            + (enligne ? " bg-green-400/10 text-green-400" : " bg-red-400/10 text-red-400");
+
+                        badge.textContent = enligne ? "EN LIGNE" : "HORS LIGNE";
+                    });
+                });
+        }
+
+        setInterval(rafraichir, 30000);
+    </script>
+
+</body>
+
+</html>
