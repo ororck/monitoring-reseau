@@ -1,0 +1,20 @@
+[14:08:38] [INFO] ==================================================
+[14:08:38] [INFO]   DÉPLOIEMENT — Dashboard Monitoring Réseau
+[14:08:38] [INFO] ==================================================
+[14:08:38] [INFO] Vérification des prérequis...
+[14:08:38] [OK] python trouvé ✓
+[14:08:38] [OK] git trouvé ✓
+[14:08:38] [INFO] Clonage du projet depuis https://github.com/ororck/monitoring-reseau.git...
+[14:08:39] [OK] Clonage terminé ✓
+[14:08:39] [INFO] Création de l'environnement virtuel...
+[14:08:48] [OK] Environnement virtuel créé ✓
+[14:08:48] [INFO] Installation des dépendances...
+[14:08:53] [OK] Dépendances installées ✓
+[14:08:53] [INFO] Lancement des tests...
+[14:08:53] [WARNING] Aucun fichier de tests trouvé — étape ignorée
+[14:08:53] [INFO] ==================================================
+[14:08:53] [OK] Déploiement terminé avec succès ✓
+[14:08:53] [INFO] Lancer l'application avec :
+[14:08:53] [INFO]   cd monitoring-reseau
+[14:08:53] [INFO]   .venv\Scripts\python app.py
+[14:08:53] [INFO] ==================================================

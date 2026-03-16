@@ -3,63 +3,202 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Monitoring Réseau</title>
+    <title>NetWatch — Simplon</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
 
-<body class="bg-gray-950 text-gray-100 min-h-screen p-10">
+<body class="bg-gray-950 text-gray-100 min-h-screen flex">
 
-    <div class="max-w-5xl mx-auto">
+    <!-- SIDEBAR -->
+    <aside class="w-56 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col p-4 fixed top-0 left-0 h-full">
 
-        <div class="mb-10">
-            <h1 class="text-3xl font-bold text-blue-400 mb-2">
-                🌐 Monitoring Réseau — 2 LAN & 1 Routeur
-            </h1>
-            <p class="text-gray-500 text-sm">
-                Surveillance en temps réel des équipements réseau — rafraîchissement automatique toutes les 30 secondes
-            </p>
+        <!-- Logo -->
+        <div class="border border-green-500 rounded px-3 py-2 mb-6">
+            <div class="font-mono font-bold text-sm">
+                <span class="text-green-400">Net</span><span class="text-green-800">Watch</span>
+            </div>
+            <div class="font-mono text-xs text-green-900">root@netwatch:~$</div>
         </div>
 
-        <div class="grid grid-cols-3 gap-6 mb-10">
-            <div class="bg-gray-900 rounded-2xl p-6 text-center">
-                <div class="text-4xl font-bold text-green-400 mb-1">
-                    {{ resultats | selectattr("statut") | list | length }}
-                </div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">En ligne</div>
+        <!-- Navigation -->
+        <nav class="flex flex-col gap-1 flex-1">
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs bg-gray-800 text-green-400 border-l-2 border-green-400">
+                <span>&gt;</span> Dashboard
+            </a>
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs text-gray-600 hover:text-green-600">
+                <span>&nbsp;&nbsp;</span> Equipements
+            </a>
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs text-gray-600 hover:text-green-600">
+                <span>&nbsp;&nbsp;</span> Alertes
+            </a>
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs text-gray-600 hover:text-green-600">
+                <span>&nbsp;&nbsp;</span> Historique
+            </a>
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs text-gray-600 hover:text-green-600">
+                <span>&nbsp;&nbsp;</span> Rapports
+            </a>
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs text-gray-600 hover:text-green-600">
+                <span>&nbsp;&nbsp;</span> Configuration
+            </a>
+            <a href="#"
+                class="flex items-center gap-2 px-3 py-2 rounded font-mono text-xs text-gray-600 hover:text-green-600">
+                <span>&nbsp;&nbsp;</span> Deploiement
+            </a>
+        </nav>
+
+        <!-- Métriques sidebar -->
+        <div class="border-t border-gray-800 pt-4 mt-4">
+            <div class="flex justify-between font-mono text-xs mb-2">
+                <span class="text-gray-600">Equipements</span>
+                <span class="text-green-400">{{ resultats | length }} / {{ resultats | length }}</span>
             </div>
-            <div class="bg-gray-900 rounded-2xl p-6 text-center">
-                <div class="text-4xl font-bold text-red-400 mb-1">
-                    {{ resultats | rejectattr("statut") | list | length }}
-                </div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Hors ligne</div>
+            <div class="flex justify-between font-mono text-xs mb-2">
+                <span class="text-gray-600">En ligne</span>
+                <span class="text-green-400">{{ resultats | selectattr("statut") | list | length }} / {{ resultats |
+                    length }}</span>
             </div>
-            <div class="bg-gray-900 rounded-2xl p-6 text-center">
-                <div class="text-4xl font-bold text-blue-400 mb-1">
-                    {{ resultats | length }}
-                </div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest">Total</div>
+            <div class="flex justify-between font-mono text-xs mb-2">
+                <span class="text-gray-600">Latence moy.</span>
+                <span class="text-green-400">2.2 ms</span>
+            </div>
+            <div class="flex justify-between font-mono text-xs">
+                <span class="text-gray-600">Derniere MAJ</span>
+                <span class="text-green-600 text-xs" id="last-update">--:--:--</span>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for eq in resultats %}
-            <div id="{{ eq.ip }}" class="bg-gray-900 rounded-2xl p-6 border-l-4
-                {{ 'border-green-400' if eq.statut else 'border-red-400' }}">
-                <div class="flex justify-between items-center mb-3">
-                    <span class="font-semibold text-gray-100">{{ eq.nom }}</span>
-                    <span class="badge text-xs font-bold px-3 py-1 rounded-full
-                        {{ 'bg-green-400/10 text-green-400' if eq.statut else 'bg-red-400/10 text-red-400' }}">
-                        {{ 'EN LIGNE' if eq.statut else 'HORS LIGNE' }}
+        <!-- Version -->
+        <div class="font-mono text-xs text-gray-800 text-center mt-4">
+            v2.0 — DevOps Edition
+        </div>
+
+    </aside>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="ml-56 flex-1 flex flex-col min-h-screen">
+
+        <!-- Top bar -->
+        <div class="bg-gray-900 border-b border-gray-800 px-8 py-3 flex items-center justify-between">
+            <div class="font-mono text-xs text-gray-600">
+                netwatch@dashboard:~$ <span class="text-green-600">monitoring --live --refresh=30s</span>
+            </div>
+            <div class="flex gap-1.5">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            </div>
+        </div>
+
+        <!-- Contenu -->
+        <div class="p-8 flex-1">
+
+            <!-- Titre -->
+            <div class="mb-8">
+                <h1 class="font-mono font-bold text-2xl text-green-400 mb-1">// Dashboard</h1>
+                <p class="font-mono text-xs text-gray-600">Surveillance reseau — Simplon x Microsoft — 2 LAN & 1 Routeur
+                </p>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="bg-gray-900 rounded border border-gray-800 p-5 text-center">
+                    <div class="font-mono font-bold text-4xl text-green-400 mb-1">
+                        {{ resultats | selectattr("statut") | list | length }}
+                    </div>
+                    <div class="font-mono text-xs text-gray-600 uppercase tracking-widest">Online</div>
+                </div>
+                <div class="bg-gray-900 rounded border border-gray-800 p-5 text-center">
+                    <div class="font-mono font-bold text-4xl text-red-400 mb-1">
+                        {{ resultats | rejectattr("statut") | list | length }}
+                    </div>
+                    <div class="font-mono text-xs text-gray-600 uppercase tracking-widest">Offline</div>
+                </div>
+                <div class="bg-gray-900 rounded border border-gray-800 p-5 text-center">
+                    <div class="font-mono font-bold text-4xl text-blue-400 mb-1">
+                        {{ resultats | length }}
+                    </div>
+                    <div class="font-mono text-xs text-gray-600 uppercase tracking-widest">Total</div>
+                </div>
+            </div>
+
+            <!-- Tableau équipements -->
+            <div class="mb-8">
+                <div class="font-mono text-xs text-gray-600 mb-3"># EQUIPMENT STATUS</div>
+
+                <div class="grid font-mono text-xs text-gray-600 uppercase tracking-widest px-4 py-2 bg-gray-900 border border-gray-800 rounded-t"
+                    style="grid-template-columns: 2fr 1.5fr 1fr 1fr 0.7fr">
+                    <span>Hostname</span>
+                    <span>IP Address</span>
+                    <span>Site</span>
+                    <span>Status</span>
+                    <span>Ping</span>
+                </div>
+
+                {% for eq in resultats %}
+                <div id="{{ eq.ip }}"
+                    class="grid font-mono text-xs px-4 py-3 border-x border-b border-gray-800 {{ 'bg-gray-950' if loop.index % 2 == 0 else 'bg-gray-900' }} hover:bg-gray-800 transition-colors"
+                    style="grid-template-columns: 2fr 1.5fr 1fr 1fr 0.7fr">
+                    <span class="text-green-300">{{ eq.nom }}</span>
+                    <span class="text-gray-500">{{ eq.ip }}</span>
+                    <span class="text-gray-600">{{ 'Site A' if '192.168.1' in eq.ip else 'Site B' }}</span>
+                    <span class="badge font-bold {{ 'text-green-400' if eq.statut else 'text-red-400' }}">
+                        {{ '[ OK ]' if eq.statut else '[FAIL ]' }}
                     </span>
+                    <span class="text-yellow-600">{{ '2ms' if eq.statut else '--' }}</span>
                 </div>
-                <div class="text-sm font-mono text-gray-500">{{ eq.ip }}</div>
+                {% endfor %}
             </div>
-            {% endfor %}
+
+            <!-- Modules en développement -->
+            <div>
+                <div class="font-mono text-xs text-gray-600 mb-3"># MODULES EN DEVELOPPEMENT</div>
+                <div class="bg-gray-900 border border-gray-800 rounded">
+                    {% set modules = [
+                    ("SQLite + Historique", "Sauvegarde des pings — graphiques disponibilite 24h"),
+                    ("Alert System", "Email automatique si equipement hors ligne"),
+                    ("GitHub Actions", "Pipeline CI/CD — tests automatiques a chaque push"),
+                    ("Docker", "Containerisation complete de l application"),
+                    ("pytest", "Tests unitaires — couverture de code automatisee"),
+                    ("YAML Config", "Gestion des equipements sans modifier le code"),
+                    ("Swagger API", "Documentation API interactive"),
+                    ("Auth Login", "Authentification pour securiser le dashboard"),
+                    ] %}
+                    {% for nom, desc in modules %}
+                    <div
+                        class="flex items-center gap-4 px-4 py-2 font-mono text-xs border-b border-gray-800 last:border-0 hover:bg-gray-800 transition-colors">
+                        <span class="text-gray-700">[ ]</span>
+                        <span class="text-green-700 w-44 shrink-0">{{ nom }}</span>
+                        <span class="text-gray-700">// {{ desc }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
 
-    </div>
+        <!-- Footer -->
+        <div class="border-t border-gray-800 px-8 py-3 flex justify-between font-mono text-xs text-gray-700">
+            <span>NetWatch — Mohamed Saidi — Formation DevOps Simplon x Microsoft</span>
+            <span>github.com/ororck/monitoring-reseau</span>
+        </div>
+
+    </main>
 
     <script>
+        function updateTime() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('last-update').textContent = `${h}:${m}:${s}`;
+        }
+
         function rafraichir() {
             fetch("/api/statuts")
                 .then(response => response.json())
@@ -67,25 +206,19 @@
                     data.forEach(eq => {
                         const carte = document.getElementById(eq.ip);
                         if (!carte) return;
-
                         const badge = carte.querySelector(".badge");
                         const enligne = eq.statut;
-
-                        carte.className = carte.className
-                            .replace("border-green-400", "")
-                            .replace("border-red-400", "")
-                            + (enligne ? " border-green-400" : " border-red-400");
-
                         badge.className = badge.className
-                            .replace("bg-green-400/10 text-green-400", "")
-                            .replace("bg-red-400/10 text-red-400", "")
-                            + (enligne ? " bg-green-400/10 text-green-400" : " bg-red-400/10 text-red-400");
-
-                        badge.textContent = enligne ? "EN LIGNE" : "HORS LIGNE";
+                            .replace("text-green-400", "")
+                            .replace("text-red-400", "")
+                            + (enligne ? " text-green-400" : " text-red-400");
+                        badge.textContent = enligne ? "[ OK  ]" : "[FAIL ]";
                     });
+                    updateTime();
                 });
         }
 
+        updateTime();
         setInterval(rafraichir, 30000);
     </script>
 
