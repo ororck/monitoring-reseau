@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>NetWatch — Simplon</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex">
@@ -155,6 +156,14 @@
                 {% endfor %}
             </div>
 
+            <!-- Graphique historique -->
+            <div class="mb-8">
+                <div class="font-mono text-xs text-gray-600 mb-3"># DISPONIBILITE 24H</div>
+                <div class="bg-gray-900 border border-gray-800 rounded p-4">
+                    <canvas id="graphique" height="80"></canvas>
+                </div>
+            </div>
+
             <!-- Modules en développement -->
             <div>
                 <div class="font-mono text-xs text-gray-600 mb-3"># MODULES EN DEVELOPPEMENT</div>
@@ -219,6 +228,64 @@
         }
 
         updateTime();
+
+        function chargerGraphique() {
+            fetch("/api/historique")
+                .then(response => response.json())
+                .then(data => {
+                    const equipements = [...new Set(data.map(d => d.nom))];
+                    const timestamps = [...new Set(data.map(d => d.timestamp.substring(0, 16)))].reverse().slice(-20);
+
+                    const couleurs = [
+                        "#00e676", "#4fc3f7", "#ffb74d", "#ce93d8", "#80cbc4", "#ff5252"
+                    ];
+
+                    const datasets = equipements.map((nom, i) => ({
+                        label: nom,
+                        data: timestamps.map(t => {
+                            const ping = data.find(d => d.nom === nom && d.timestamp.substring(0, 16) === t);
+                            return ping ? ping.statut : null;
+                        }),
+                        borderColor: couleurs[i % couleurs.length],
+                        backgroundColor: couleurs[i % couleurs.length] + "22",
+                        stepped: true,
+                        tension: 0,
+                        pointRadius: 3,
+                    }));
+
+                    new Chart(document.getElementById("graphique"), {
+                        type: "line",
+                        data: { labels: timestamps, datasets },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    min: 0, max: 1,
+                                    ticks: {
+                                        stepSize: 1,
+                                        callback: v => v === 1 ? "EN LIGNE" : v === 0 ? "HORS LIGNE" : "",
+                                        color: "#4b5563",
+                                        font: { family: "monospace", size: 10 }
+                                    },
+                                    grid: { color: "#1f2937" }
+                                },
+                                x: {
+                                    ticks: { color: "#4b5563", font: { family: "monospace", size: 9 }, maxRotation: 45 },
+                                    grid: { color: "#1f2937" }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: { color: "#6b7280", font: { family: "monospace", size: 9 } }
+                                }
+                            }
+                        }
+                    });
+                });
+        }
+
+        chargerGraphique();
+
         setInterval(rafraichir, 30000);
     </script>
 
