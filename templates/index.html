@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NetWatch — Simplon</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -11,7 +12,8 @@
 <body class="bg-gray-950 text-gray-100 min-h-screen flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-56 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col p-4 fixed top-0 left-0 h-full">
+    <aside
+        class="w-56 min-h-screen bg-gray-900 border-r border-gray-800 flex flex-col p-4 fixed top-0 left-0 h-full z-10">
 
         <!-- Logo -->
         <div class="border border-green-500 rounded px-3 py-2 mb-6">
@@ -74,7 +76,6 @@
             </div>
         </div>
 
-        <!-- Version -->
         <div class="font-mono text-xs text-gray-800 text-center mt-4">
             v2.0 — DevOps Edition
         </div>
@@ -82,14 +83,14 @@
     </aside>
 
     <!-- CONTENU PRINCIPAL -->
-    <main class="ml-56 flex-1 flex flex-col min-h-screen">
+    <main class="ml-56 flex-1 flex flex-col min-h-screen min-w-0">
 
         <!-- Top bar -->
-        <div class="bg-gray-900 border-b border-gray-800 px-8 py-3 flex items-center justify-between">
-            <div class="font-mono text-xs text-gray-600">
+        <div class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+            <div class="font-mono text-xs text-gray-600 truncate">
                 netwatch@dashboard:~$ <span class="text-green-600">monitoring --live --refresh=30s</span>
             </div>
-            <div class="flex gap-1.5">
+            <div class="flex gap-1.5 shrink-0 ml-4">
                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
@@ -97,17 +98,17 @@
         </div>
 
         <!-- Contenu -->
-        <div class="p-8 flex-1">
+        <div class="p-6 flex-1">
 
             <!-- Titre -->
-            <div class="mb-8">
+            <div class="mb-6">
                 <h1 class="font-mono font-bold text-2xl text-green-400 mb-1">// Dashboard</h1>
                 <p class="font-mono text-xs text-gray-600">Surveillance reseau — Simplon x Microsoft — 2 LAN & 1 Routeur
                 </p>
             </div>
 
             <!-- KPIs -->
-            <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="grid grid-cols-3 gap-4 mb-6">
                 <div class="bg-gray-900 rounded border border-gray-800 p-5 text-center">
                     <div class="font-mono font-bold text-4xl text-green-400 mb-1">
                         {{ resultats | selectattr("statut") | list | length }}
@@ -129,38 +130,40 @@
             </div>
 
             <!-- Tableau équipements -->
-            <div class="mb-8">
+            <div class="mb-6">
                 <div class="font-mono text-xs text-gray-600 mb-3"># EQUIPMENT STATUS</div>
-
-                <div class="grid font-mono text-xs text-gray-600 uppercase tracking-widest px-4 py-2 bg-gray-900 border border-gray-800 rounded-t"
-                    style="grid-template-columns: 2fr 1.5fr 1fr 1fr 0.7fr">
-                    <span>Hostname</span>
-                    <span>IP Address</span>
-                    <span>Site</span>
-                    <span>Status</span>
-                    <span>Ping</span>
+                <div class="overflow-x-auto">
+                    <div class="min-w-xl">
+                        <div class="grid font-mono text-xs text-gray-600 uppercase tracking-widest px-4 py-2 bg-gray-900 border border-gray-800 rounded-t"
+                            style="grid-template-columns: 2fr 1.5fr 1fr 1fr 0.7fr">
+                            <span>Hostname</span>
+                            <span>IP Address</span>
+                            <span>Site</span>
+                            <span>Status</span>
+                            <span>Ping</span>
+                        </div>
+                        {% for eq in resultats %}
+                        <div id="{{ eq.ip }}"
+                            class="grid font-mono text-xs px-4 py-3 border-x border-b border-gray-800 {{ 'bg-gray-950' if loop.index % 2 == 0 else 'bg-gray-900' }} hover:bg-gray-800 transition-colors"
+                            style="grid-template-columns: 2fr 1.5fr 1fr 1fr 0.7fr">
+                            <span class="text-green-300">{{ eq.nom }}</span>
+                            <span class="text-gray-500">{{ eq.ip }}</span>
+                            <span class="text-gray-600">{{ 'Site A' if '192.168.1' in eq.ip else 'Site B' }}</span>
+                            <span class="badge font-bold {{ 'text-green-400' if eq.statut else 'text-red-400' }}">
+                                {{ '[ OK ]' if eq.statut else '[FAIL ]' }}
+                            </span>
+                            <span class="text-yellow-600">{{ '2ms' if eq.statut else '--' }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
-
-                {% for eq in resultats %}
-                <div id="{{ eq.ip }}"
-                    class="grid font-mono text-xs px-4 py-3 border-x border-b border-gray-800 {{ 'bg-gray-950' if loop.index % 2 == 0 else 'bg-gray-900' }} hover:bg-gray-800 transition-colors"
-                    style="grid-template-columns: 2fr 1.5fr 1fr 1fr 0.7fr">
-                    <span class="text-green-300">{{ eq.nom }}</span>
-                    <span class="text-gray-500">{{ eq.ip }}</span>
-                    <span class="text-gray-600">{{ 'Site A' if '192.168.1' in eq.ip else 'Site B' }}</span>
-                    <span class="badge font-bold {{ 'text-green-400' if eq.statut else 'text-red-400' }}">
-                        {{ '[ OK ]' if eq.statut else '[FAIL ]' }}
-                    </span>
-                    <span class="text-yellow-600">{{ '2ms' if eq.statut else '--' }}</span>
-                </div>
-                {% endfor %}
             </div>
 
-            <!-- Graphique historique -->
-            <div class="mb-8">
+            <!-- Mini cartes graphiques par équipement -->
+            <div class="mb-6">
                 <div class="font-mono text-xs text-gray-600 mb-3"># DISPONIBILITE 24H</div>
-                <div class="bg-gray-900 border border-gray-800 rounded p-4">
-                    <canvas id="graphique" height="80"></canvas>
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4" id="cartes-graphiques">
+                    <!-- Générées par JavaScript -->
                 </div>
             </div>
 
@@ -169,20 +172,24 @@
                 <div class="font-mono text-xs text-gray-600 mb-3"># MODULES EN DEVELOPPEMENT</div>
                 <div class="bg-gray-900 border border-gray-800 rounded">
                     {% set modules = [
-                    ("SQLite + Historique", "Sauvegarde des pings — graphiques disponibilite 24h"),
-                    ("Alert System", "Email automatique si equipement hors ligne"),
-                    ("GitHub Actions", "Pipeline CI/CD — tests automatiques a chaque push"),
-                    ("Docker", "Containerisation complete de l application"),
-                    ("pytest", "Tests unitaires — couverture de code automatisee"),
-                    ("YAML Config", "Gestion des equipements sans modifier le code"),
-                    ("Swagger API", "Documentation API interactive"),
-                    ("Auth Login", "Authentification pour securiser le dashboard"),
+                    ("[x] SQLite + Historique", "Sauvegarde des pings — graphiques disponibilite 24h"),
+                    ("[ ] Alert System", "Email automatique si equipement hors ligne"),
+                    ("[ ] GitHub Actions", "Pipeline CI/CD — tests automatiques a chaque push"),
+                    ("[ ] Docker", "Containerisation complete de l application"),
+                    ("[ ] pytest", "Tests unitaires — couverture de code automatisee"),
+                    ("[ ] YAML Config", "Gestion des equipements sans modifier le code"),
+                    ("[ ] Swagger API", "Documentation API interactive"),
+                    ("[ ] Auth Login", "Authentification pour securiser le dashboard"),
                     ] %}
                     {% for nom, desc in modules %}
                     <div
                         class="flex items-center gap-4 px-4 py-2 font-mono text-xs border-b border-gray-800 last:border-0 hover:bg-gray-800 transition-colors">
-                        <span class="text-gray-700">[ ]</span>
-                        <span class="text-green-700 w-44 shrink-0">{{ nom }}</span>
+                        <span class="{{ 'text-green-600' if '[x]' in nom else 'text-gray-700' }} shrink-0">
+                            {{ '[x]' if '[x]' in nom else '[ ]' }}
+                        </span>
+                        <span class="{{ 'text-green-500' if '[x]' in nom else 'text-green-700' }} w-44 shrink-0">
+                            {{ nom.replace('[x] ', '').replace('[ ] ', '') }}
+                        </span>
                         <span class="text-gray-700">// {{ desc }}</span>
                     </div>
                     {% endfor %}
@@ -192,7 +199,8 @@
         </div>
 
         <!-- Footer -->
-        <div class="border-t border-gray-800 px-8 py-3 flex justify-between font-mono text-xs text-gray-700">
+        <div
+            class="border-t border-gray-800 px-6 py-3 flex justify-between font-mono text-xs text-gray-700 flex-wrap gap-2">
             <span>NetWatch — Mohamed Saidi — Formation DevOps Simplon x Microsoft</span>
             <span>github.com/ororck/monitoring-reseau</span>
         </div>
@@ -200,6 +208,16 @@
     </main>
 
     <script>
+        const COULEURS = {
+            "PC0 - Site A": "#00e676",
+            "PC1 - Site A": "#4fc3f7",
+            "Routeur - Site A": "#ffb74d",
+            "Routeur - Site B": "#ce93d8",
+            "PC2 - Site B": "#80cbc4",
+            "PC3 - Site B": "#ff5252",
+        };
+        const DEFAULT_COLORS = ["#00e676", "#4fc3f7", "#ffb74d", "#ce93d8", "#80cbc4", "#ff5252"];
+
         function updateTime() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
@@ -210,7 +228,7 @@
 
         function rafraichir() {
             fetch("/api/statuts")
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     data.forEach(eq => {
                         const carte = document.getElementById(eq.ip);
@@ -227,65 +245,97 @@
                 });
         }
 
-        updateTime();
-
-        function chargerGraphique() {
+        function chargerGraphiques() {
             fetch("/api/historique")
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     const equipements = [...new Set(data.map(d => d.nom))];
-                    const timestamps = [...new Set(data.map(d => d.timestamp.substring(0, 16)))].reverse().slice(-20);
+                    const container = document.getElementById("cartes-graphiques");
+                    container.innerHTML = "";
 
-                    const couleurs = [
-                        "#00e676", "#4fc3f7", "#ffb74d", "#ce93d8", "#80cbc4", "#ff5252"
-                    ];
+                    equipements.forEach((nom, idx) => {
+                        const pings = data
+                            .filter(d => d.nom === nom)
+                            .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+                            .slice(-20);
 
-                    const datasets = equipements.map((nom, i) => ({
-                        label: nom,
-                        data: timestamps.map(t => {
-                            const ping = data.find(d => d.nom === nom && d.timestamp.substring(0, 16) === t);
-                            return ping ? ping.statut : null;
-                        }),
-                        borderColor: couleurs[i % couleurs.length],
-                        backgroundColor: couleurs[i % couleurs.length] + "22",
-                        stepped: true,
-                        tension: 0,
-                        pointRadius: 3,
-                    }));
+                        const uptime = pings.length
+                            ? Math.round(pings.filter(p => p.statut).length / pings.length * 100)
+                            : 0;
 
-                    new Chart(document.getElementById("graphique"), {
-                        type: "line",
-                        data: { labels: timestamps, datasets },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    min: 0, max: 1,
-                                    ticks: {
-                                        stepSize: 1,
-                                        callback: v => v === 1 ? "EN LIGNE" : v === 0 ? "HORS LIGNE" : "",
-                                        color: "#4b5563",
-                                        font: { family: "monospace", size: 10 }
-                                    },
-                                    grid: { color: "#1f2937" }
-                                },
-                                x: {
-                                    ticks: { color: "#4b5563", font: { family: "monospace", size: 9 }, maxRotation: 45 },
-                                    grid: { color: "#1f2937" }
-                                }
+                        const dernierStatut = pings.length ? pings[pings.length - 1].statut : 0;
+                        const couleur = COULEURS[nom] || DEFAULT_COLORS[idx % DEFAULT_COLORS.length];
+                        const statutTxt = dernierStatut ? "ONLINE" : "OFFLINE";
+                        const statutCol = dernierStatut ? "text-green-400" : "text-red-400";
+                        const borderCol = dernierStatut ? "border-green-900" : "border-red-900";
+
+                        // Créer la carte
+                        const carte = document.createElement("div");
+                        carte.className = `bg-gray-900 border ${borderCol} rounded p-4 flex flex-col gap-2`;
+                        carte.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono text-xs font-bold text-gray-300">${nom}</span>
+                                <span class="font-mono text-xs font-bold ${statutCol}">${statutTxt}</span>
+                            </div>
+                            <canvas id="chart-${idx}" height="60"></canvas>
+                            <div class="flex justify-between font-mono text-xs">
+                                <span class="text-gray-700">Uptime</span>
+                                <span style="color: ${couleur}">${uptime}%</span>
+                            </div>
+                        `;
+                        container.appendChild(carte);
+
+                        // Créer le graphique
+                        const labels = pings.map(p => p.timestamp.substring(11, 16));
+                        const values = pings.map(p => p.statut);
+
+                        new Chart(document.getElementById(`chart-${idx}`), {
+                            type: "line",
+                            data: {
+                                labels,
+                                datasets: [{
+                                    data: values,
+                                    borderColor: couleur,
+                                    backgroundColor: couleur + "22",
+                                    fill: true,
+                                    stepped: true,
+                                    tension: 0,
+                                    pointRadius: 2,
+                                    borderWidth: 1.5,
+                                }]
                             },
-                            plugins: {
-                                legend: {
-                                    labels: { color: "#6b7280", font: { family: "monospace", size: 9 } }
+                            options: {
+                                responsive: true,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: {
+                                        min: 0, max: 1,
+                                        ticks: {
+                                            stepSize: 1,
+                                            callback: v => v === 1 ? "UP" : v === 0 ? "DN" : "",
+                                            color: "#374151",
+                                            font: { family: "monospace", size: 8 }
+                                        },
+                                        grid: { color: "#111827" }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: "#374151",
+                                            font: { family: "monospace", size: 7 },
+                                            maxRotation: 0,
+                                            maxTicksLimit: 5,
+                                        },
+                                        grid: { color: "#111827" }
+                                    }
                                 }
                             }
-                        }
+                        });
                     });
                 });
         }
 
-        chargerGraphique();
-
+        updateTime();
+        chargerGraphiques();
         setInterval(rafraichir, 30000);
     </script>
 
